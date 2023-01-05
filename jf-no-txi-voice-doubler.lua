@@ -41,11 +41,11 @@ input[1].change = function(s)
     end
 
     doubleCount = doubleCount + 1
-    if doubleCount % 2 then
-      output[1](s)
+    if doubleCount % 2 == 1 then
+      output[1](true)
       output[2].volts = input[2].volts
     else
-      output[3](s)
+      output[3](true)
       output[4].volts = input[2].volts
     end
 end
@@ -72,10 +72,10 @@ function init()
   input[1].mode('change', 1, 0.1, 'rising')
 
   -- out params
-  output[1].action = pulse(2, 5) 
+  output[1].action = adsr(0, 0.02, 0)
   output[2].volts  = 0
   
-  output[3].action = pulse(2, 5)
+  output[3].action = adsr(0, 0.02, 0)
   output[4].volts  = 0
 
   tmetro = metro.init{ event = trans, time = 0.03 }
