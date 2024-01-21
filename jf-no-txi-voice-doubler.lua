@@ -5,22 +5,10 @@ public{delay = 0.003}:range(0.003, 2):type('exp')
 public{tuneTwo = 0}:range(-1, 1):type('slider')
 public{tuneThree = 0}:range(-1, 1):type('slider')
 
--- input[2].stream  = function(s)
---     transpose = input[2].volts - lastNote
---     if (transpose > 0.008 or transpose < -0.008) and jfMode == 1 then
---         ii.jf.transpose(transpose - 2)
---     elseif jfMode == 1 then
---         ii.jf.transpose(-2)
---     else
---         ii.jf.transpose(0)
---     end
--- end
-
 input[1].change = function(s)
     getters()
 
     if speed > 0 and tsc == 1.0 then
-        tmetro:start()
         ii.jf.mode(1)
         jfMode = 1
         lastNote = input[2].volts
@@ -32,7 +20,6 @@ input[1].change = function(s)
         jfMode = 0
         noteCount = 0
         ii.jf.mode(0)
-        tmetro:stop()
     end
 
     doubleCount = doubleCount + 1
@@ -59,14 +46,16 @@ function playVoice()
     lastNote = input[2].volts
 end
 
-function trans(count)
+input[2].stream  = function(s)
     transpose = input[2].volts - lastNote
-    if (transpose > 0.008 or transpose < -0.008) then
+    if (transpose > 0.008 or transpose < -0.008) and jfMode == 1 then
         ii.jf.transpose(transpose - 2)
+    elseif jfMode == 0 then
+        ii.jf.transpose(0)
     else
         ii.jf.transpose(-2)
     end
-end
+  end
 
 function getters()
     ii.jf.get('speed')
@@ -89,7 +78,11 @@ function init()
     noteCount = 0
     doubleCount = 0
     jfMode = 0
+    speed = 0
+    tsc = 0
     input[1].mode('change', 1, 0.1, 'rising')
+    input[2].mode('stream', 0.03)
+    --stream was 0.1 but that gave stability issues see if this is better
 
     -- out params
     output[1].action = adsr(0, 0.02, 0)
@@ -97,6 +90,4 @@ function init()
 
     output[3].action = adsr(0, 0.02, 0)
     output[4].volts  = 0
-
-    tmetro = metro.init{ event = trans, time = 0.03 }
 end
