@@ -21,28 +21,20 @@ input[1].change = function(s)
 
     if jfMode == 1 then
         lastNote = input[2].volts
-        -- delay( 0.003, function() 
-
         ii.jf.play_note(input[2].volts,5) 
         if jfPoly == 3 then
-            -- ii.jf.play_note((input[2].volts + jfOne),5)
-            delay(function () ii.jf.play_note(input[2].volts + jfOne, 5) end, jfDelay)
-            -- ii.jf.play_note((input[2].volts + jfTwo),5)
-            delay(function () ii.jf.play_note(input[2].volts + jfTwo, 5) end, (jfDelay * 2))
+            -- make in 4 a velocity changer for the subsequent notes
+            delay(function () ii.jf.play_note(input[2].volts + jfOne, (5 - velocity)) end, jfDelay)
+            delay(function () ii.jf.play_note(input[2].volts + jfTwo, (5 - velocity * 2)) end, (jfDelay * 2))
         elseif jfPoly == 2 then
-            -- delay(ii.jf.play_note((input[2].volts + jfOne),5), 0.5)
-            delay(function () ii.jf.play_note(input[2].volts + jfOne, 5) end, jfDelay)
+            delay(function () ii.jf.play_note(input[2].volts + jfOne, (5 - velocity)) end, jfDelay)
         end
             
-            lastNote = input[2].volts 
+        lastNote = input[2].volts 
         -- end )
     end
 end
 
-function playSecond()
-    ii.jf.play_note((input[2].volts + jfOne),5)
-end
- 
 function getters()
     ii.txi[1].get('param',1)
     ii.txi[1].get('param',2)
@@ -88,6 +80,8 @@ function getters()
             inTwo = value
         elseif e.name == 'in' and e.arg == 3 then
             inThree = value
+        elseif e.name == 'in' and e.arg == 4 then
+            velocity = value
         end
     end
 
@@ -107,8 +101,8 @@ function init()
     inOne = 0
     inTwo = 0
     inThree = 0
-    -- inFour = 0 -- whattodo....
-    
+    velocity = 0
+
     print('initing')
     input[1].mode('change', 1, 0.1, 'rising')
     input[2].mode('stream', 0.01)
@@ -123,9 +117,6 @@ function init()
 
     output[4].volts = 0 -- press add
  
-   -- start getter metro
---    tmetro = metro.init{ event = getters(), time = 0.03 }
---    tmetro:start()
 
     metro[1].event = function(c) getters() end
     metro[1].time  = 0.01

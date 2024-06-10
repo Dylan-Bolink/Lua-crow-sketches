@@ -1,10 +1,5 @@
 -- JF with transpose and voice doubler out
 
-public{poly = 1}:range(1, 3):type('int')
-public{delay = 0.003}:range(0.003, 2):type('exp')
-public{tuneTwo = 0}:range(-1, 1):type('slider')
-public{tuneThree = 0}:range(-1, 1):type('slider')
-
 input[1].change = function(s)
     getters()
 
@@ -21,29 +16,11 @@ input[1].change = function(s)
         noteCount = 0
         ii.jf.mode(0)
     end
-
-    doubleCount = doubleCount + 1
-    if doubleCount % 2 == 1 then
-        output[1](true)
-        output[2].volts = input[2].volts
-    else
-        output[3](true)
-        output[4].volts = input[2].volts
-    end
 end
 
 function playVoice()
     lastNote = input[2].volts
     ii.jf.play_note(input[2].volts,5) lastNote = input[2].volts
-
-
-    if public.poly == 3 then
-        delay(function () ii.jf.play_note(lastNote + public.tuneTwo, 5) end, public.delay)
-        delay(function () ii.jf.play_note(lastNote + public.tuneThree, 5) end, (public.delay * 2))
-    elseif public.poly == 2 then
-        delay(function () ii.jf.play_note(lastNote + public.tuneTwo, 5) end, public.delay)
-    end
-    lastNote = input[2].volts
 end
 
 input[2].stream  = function(s)
@@ -76,18 +53,12 @@ function init()
     getters()
     lastNote = 0
     noteCount = 0
-    doubleCount = 0
+
     jfMode = 0
     speed = 0
     tsc = 0
     input[1].mode('change', 1, 0.1, 'rising')
-    input[2].mode('stream', 0.03)
+    input[2].mode('stream', 0.05)
     --stream was 0.1 but that gave stability issues see if this is better
 
-    -- out params
-    output[1].action = adsr(0, 0.02, 0)
-    output[2].volts  = 0
-
-    output[3].action = adsr(0, 0.02, 0)
-    output[4].volts  = 0
 end
